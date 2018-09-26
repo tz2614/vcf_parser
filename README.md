@@ -29,18 +29,18 @@ Parse a vcf file and get a list of pyvcf Record object containing the annotated 
 
 To use the function from my script, parse the following as arguments to my function
 
-1. first argument: path to the annotated vcf
+1.first argument: path to the annotated vcf
 
 e.g. /mnt/storage/home/garnerm/vcf_fix/X006200.refseq_nirvana_203.fixed.annotated.vcf 
 
 Note: This vcf has modified to conform with the latest vcf specifications, if your vcf do not conform to the vcf specification then running the script will likely have relevant errors displayed and recorded in the vcf_parse_error_log.txt.
 
-2. second argument: a list of transcripts or RefSeq IDs
+2.second argument: a list of transcripts or RefSeq IDs
 
 This should be derived from your function, or alternatively if you have access to the cluster at CUH lab you can use
 /mnt/storage/data/NGS/nirvana_genes2transcripts
 
-3. To test the function, first navigate to the directory where the test script is stored
+3.To test the function, first navigate to the directory where the test script is stored
 
 ```Bash
 cd /mnt/storage/home/zhengt/Competencies/CBI-5_Programming/DOPs/
@@ -54,7 +54,7 @@ $pytest test_variants_from_vcf.py
 
 If the test passes, then a green double dash line with the message "1 passed in ###### second" should be displayd.
 
-4. To execute the program and get a list of pyvcf Record objects from the vcf file, type the following
+4.To execute the program and get a list of pyvcf Record objects from the vcf file, type the following
 e.g. assume the path to the vcf file = PATH2VCF
 
 ```Bash
