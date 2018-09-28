@@ -57,21 +57,29 @@ def transcript_list():
 @pytest.mark.usefixtures("path_to_vcf")
 def test_get_variants_in_vcf(path_to_vcf, transcript_list):
 
-	"""take arguments from path_to_vcf and transcript_list and get a output frp, get_variants_in_vcf function,
-	then check each object from the output, and see if values returned from the properties of each object is equal to the fixed field values as expected"""
+	"""take arguments from path_to_vcf and transcript_list and get a list of pyvcf objects from get_variants_in_vcf function,
+	check each object from the output, and see if values returned from the properties of each object is equal to the string or integer values as expected"""
 
 	pyvcf_variants = variants_from_vcf.get_variants_in_vcf(path_to_vcf, transcript_list)
 
-	for record in pyvcf_variants:
+	print (pyvcf_variants[0].CHROM)
+	print (pyvcf_variants[0].POS)
+	print (pyvcf_variants[0].REF)
+	print (pyvcf_variants[0].ALT)
 
-		print (record.CHROM)
-		print (record.POS)
-		print (record.REF)
-		print (record.ALT)
+	assert int(pyvcf_variants[0].CHROM) == 1, "CHROM number of variant in list INCORRECT"
+	assert int(pyvcf_variants[0].POS) == 1007203, "POS of variant in list INCORRECT"
+	assert str(pyvcf_variants[0].REF) == "A", "REF of variant in list INCORRECT"
+	assert str(pyvcf_variants[0].ALT[0]) == "G", "ALT of variant in list INCORRECT"
 
-		assert int(record.CHROM) == 1, "CHROM number of variant in list INCORRECT"
-		assert int(record.POS) == 1007203 or int(record.POS) == 1007222, "POS of variant in list INCORRECT"
-		assert str(record.REF) == "A" or str(record.REF) == "G", "REF of variant in list INCORRECT"
-		assert str(record.ALT[0]) == "G" or str(record.ALT[0]) == "T", "ALT of variant in list INCORRECT"
+	print (pyvcf_variants[-1].CHROM)
+	print (pyvcf_variants[-1].POS)
+	print (pyvcf_variants[-1].REF)
+	print (pyvcf_variants[-1].ALT)
 
-	return record
+	assert int(pyvcf_variants[-1].CHROM) == 1, "CHROM number of variant in list INCORRECT"
+	assert int(pyvcf_variants[-1].POS) == 1007222, "POS of variant in list INCORRECT"
+	assert str(pyvcf_variants[-1].REF) == "G", "REF of variant in list INCORRECT"
+	assert str(pyvcf_variants[-1].ALT[0]) == "T", "ALT of variant in list INCORRECT"
+	
+	return pyvcf_variants

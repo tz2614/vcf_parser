@@ -1,10 +1,9 @@
-#!usr/bin/python
+#!usr/bin/python2
 
 from __future__ import print_function
 import sys
 import os
 import vcf
-import pprint as pp
 
 
 """generate a list of variants from an annotated vcf against the transcripts in transcript_list"""
@@ -21,14 +20,9 @@ def get_variants_in_vcf(annotated_vcf, transcript_list):
 	Returns:
 		list of pyvcf Record objects"""
 
-	#gene2transcript = {}
-	#genes = []
-	#transcripts = []
 	record_list = []
 
-	#assert os.path.exists(transcript_list), "gene2transcript list DO NOT exists"
-	assert os.path.exists(annotated_vcf), "{} DO NOT exists".format(annotated_vcf)
-	assert type(transcript_list), "{} is NOT a list".format(transcript_list)
+	assert type(transcript_list) == list, "{} is NOT a list".format(transcript_list)
 
 	# open the annotated vcf and search records that contain the gene of interest, return the record as a pyvcf Record object
 
@@ -43,41 +37,53 @@ def get_variants_in_vcf(annotated_vcf, transcript_list):
 		try: 
 			vcf_reader = vcf.Reader(vcf_file)
 
-		except (TypeError, RuntimeError, NameError, ValueError):
+		except (TypeError, RuntimeError, NameError, ValueError) as e:
 			with open(error_log, "a") as err_log:
-				err_log.writelines(TypeError)
-				err_log.writelines(NameError)
-				err_log.writelines(ValueError)
-			pass
+				err_log.writelines(e)
 
+
+		"""Iterate through the INFO header and find the field containing RefSeq ID, e.g. "RefSeq", return the index as i."""
+
+		with open (annotated_vcf, "r") as vcf_file:
+			for line in vcf_file:
+				if line.startswith("##INFO=<ID=CSQ"):
+					fields = line.split(":")[-1].split("|")
+					for index, field in enumerate(fields):
+						if field == "RefSeq":
+							i = index
+
+		"""Then in the INFO "CSQ" field i, check if the RefSeq ID matches any RefSeq ID in the transcript list. 
+		If there is a match and not already present, add it to the list; if the RefSeq ID field is empty record it in error log."""
 
 		for record in vcf_reader:
 			
 			CSQ = record.INFO["CSQ"]
 
 			for line in CSQ:
-				#print (line)
-				infos = line.split("|")
-				for info in infos:
-					if info != "" and info in transcript_list and record not in record_list:
-						#print (record.CHROM, record.POS, record.REF, record.ALT, CSQ)
-						print (record)
-						record_list.append(record)
-					else:
-						continue
-
+				info = line.split("|")[i]
 			
+				if info in transcript_list and record not in record_list:
+					print (line)
+					record_list.append(record)
 
-	#pp.pprint (gene2transcript)
-	#print ("Here is a list of pyvcf Record objects: \n")
-	#print (record_list)
+
+				elif info == "":
+					print ("RefSeq not found")
+					with open (error_log) as err_log:
+						err_log,writelines("RefSeq not found in {}".format(line))
+						continue
+				else:
+					continue
+
 	return  (record_list)
 
 def main(annotated_vcf, gene2transcript_manifest):
 
 	# check that the manifest exist as a data source for the transcript_list
+	assert os.path.exists(annotated_vcf), "{} DO NOT exists".format(annotated_vcf)
 	assert os.path.exists(gene2transcript_manifest), "{} DO NOT exist".format(gene2transcript_manifest)
 
+	# generate a list of transcripts using RefSeq IDs from gene2transcript_manifest)
 	transcript_list = []
 
 	with open(gene2transcript_manifest, "r") as gene_transcripts:
@@ -85,6 +91,7 @@ def main(annotated_vcf, gene2transcript_manifest):
 			fields = line.strip().split("\t")
 			transcript_list.append(fields[-1])
 
+	# create a list of vcf variants in the form of pyvcf objects
 	record_list = get_variants_in_vcf(annotated_vcf, transcript_list)
 
 if __name__ == "__main__":
