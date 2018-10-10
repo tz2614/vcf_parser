@@ -65,9 +65,8 @@ def get_variants_in_vcf(annotated_vcf, transcript_list):
 				info = line.split("|")[i]
 			
 				if info in transcript_list and record not in record_list:
-					print (line)
+					print (record)
 					record_list.append(record)
-
 
 				elif info == "":
 					print ("RefSeq not found")
